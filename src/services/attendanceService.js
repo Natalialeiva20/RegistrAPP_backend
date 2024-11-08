@@ -99,3 +99,28 @@ export const validateStudentInSection = async (studentId, sectionId) => {
       connection.release();
     }
   };
+  export const verifyPassword = async (email, password) => {
+  const connection = await pool.getConnection();
+  try {
+    // Consulta para obtener el hash de la contraseña del usuario por email
+    const [rows] = await connection.query(
+      `SELECT password_hash FROM asist_user WHERE email = ?`,
+      [email]
+    );
+
+    if (rows.length === 0) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    const { password_hash } = rows[0];
+
+    // Comparar la contraseña ingresada con el hash almacenado
+    const isMatch = await bcrypt.compare(password, password_hash);
+    return isMatch;
+  } catch (error) {
+    console.error('Error en verifyPassword:', error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+};

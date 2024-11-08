@@ -9,6 +9,7 @@ import attendanceRoutes from './routes/attendanceRoutes.js';
 
 
 
+
 const app = express();
 
 // Middlewares
