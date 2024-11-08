@@ -1,5 +1,6 @@
 // services/attendanceService.js
 import pool from '../config/db.js';
+import moment from 'moment-timezone';
 
 export const getAttendancesByStudentAndSection = async (studentId, sectionId) => {
   const connection = await pool.getConnection();
@@ -82,7 +83,9 @@ export const validateStudentInSection = async (studentId, sectionId) => {
   export const registerAttendance = async (studentId, classId) => {
     const connection = await pool.getConnection();
     try {
-      const fechaRegistro = new Date(); // Fecha actual
+      // Obtener la fecha actual con la zona horaria de Santiago de Chile y formatearla correctamente
+      const fechaRegistro = moment().tz('America/Santiago').format('YYYY-MM-DD HH:mm:ss');
+  
       const attendanceId = await generateNewAttendanceId(); // Generar nuevo ID único
   
       await connection.query(
@@ -99,28 +102,3 @@ export const validateStudentInSection = async (studentId, sectionId) => {
       connection.release();
     }
   };
-  export const verifyPassword = async (email, password) => {
-  const connection = await pool.getConnection();
-  try {
-    // Consulta para obtener el hash de la contraseña del usuario por email
-    const [rows] = await connection.query(
-      `SELECT password_hash FROM asist_user WHERE email = ?`,
-      [email]
-    );
-
-    if (rows.length === 0) {
-      throw new Error('Usuario no encontrado');
-    }
-
-    const { password_hash } = rows[0];
-
-    // Comparar la contraseña ingresada con el hash almacenado
-    const isMatch = await bcrypt.compare(password, password_hash);
-    return isMatch;
-  } catch (error) {
-    console.error('Error en verifyPassword:', error);
-    throw error;
-  } finally {
-    connection.release();
-  }
-};
